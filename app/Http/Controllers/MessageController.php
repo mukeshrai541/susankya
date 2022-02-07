@@ -17,9 +17,9 @@ class MessageController extends Controller
 
     public function index()
     {
-        $messages = Message::latest()->get();
+        // $messages = Message::latest()->get();
 
-        return view($this->indexView, compact('messages'));
+        return view($this->indexView);
     }
 
 
@@ -115,6 +115,26 @@ class MessageController extends Controller
 
         } else {
             return redirect()->back()->with('msg', 'confirmation code did not match');
+        }
+    }
+
+    public function search(Request $request)
+    {
+        $request->validate([
+            'keyword' => 'required|integer',
+        ]);
+
+        $keyword = $request->keyword;
+        $result = Message::where('security_code', $keyword)->first();
+
+        if($result){
+            if($result->submitted == 1){
+                return redirect()->route('message.show', $result->id);
+            }else{
+                return redirect()->route('message.edit', $result->id);
+            }
+        }else{
+            return redirect()->back()->with('msg', $keyword.' did not match with any record.');
         }
     }
 }
